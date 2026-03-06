@@ -20,12 +20,13 @@ export interface Product {
 }
 
 function slugify(text: string): string {
-  return text
+  const base = text
     .toLowerCase()
     .replace(/[^\w\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .trim()
+  return `${base}-${Date.now()}`
 }
 
 export async function getProducts(): Promise<Product[]> {

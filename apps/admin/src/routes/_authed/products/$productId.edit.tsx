@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useCallback } from 'react'
 import { Button, StatusBadge } from '@life-axe/ui'
-import { Save, Sparkles } from 'lucide-react'
+import { Save, Sparkles, AlertCircle } from 'lucide-react'
 import { getProduct, updateProduct, uploadPdfToStorage } from '~/lib/products'
 import { generateGuideContent } from '~/lib/content'
 import { ProductForm } from '~/components/products/ProductForm'
@@ -33,6 +33,7 @@ function ProductEditorPage() {
   )
   const [status, setStatus] = useState(product.status)
   const [pdfUrl, setPdfUrl] = useState(product.pdf_url)
+  const [error, setError] = useState<string | null>(null)
 
   const [saving, setSaving] = useState(false)
   const [generating, setGenerating] = useState(false)
@@ -40,6 +41,7 @@ function ProductEditorPage() {
 
   const handleSave = useCallback(async () => {
     setSaving(true)
+    setError(null)
     try {
       await updateProduct(productId, {
         title: form.title,
@@ -51,6 +53,8 @@ function ProductEditorPage() {
         short_description: form.shortDescription || null,
         content_json: content as Record<string, unknown> | null,
       })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save')
     } finally {
       setSaving(false)
     }
@@ -58,6 +62,7 @@ function ProductEditorPage() {
 
   const handleGenerateContent = useCallback(async () => {
     setGenerating(true)
+    setError(null)
     try {
       // Save metadata first
       await updateProduct(productId, {
@@ -88,6 +93,10 @@ function ProductEditorPage() {
         content_json: result as unknown as Record<string, unknown>,
         status: 'CONTENT_GENERATED',
       })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Content generation failed'
+      setError(message)
+      console.error('Generate content error:', err)
     } finally {
       setGenerating(false)
     }
@@ -96,6 +105,7 @@ function ProductEditorPage() {
   const handleGeneratePdf = useCallback(async () => {
     if (!content) return
     setGeneratingPdf(true)
+    setError(null)
     try {
       const { pdf } = await import('@react-pdf/renderer')
       const { LifeAxeClassicPDF } = await import('@life-axe/ui/src/pdf/LifeAxeClassicPDF')
@@ -107,6 +117,15 @@ function ProductEditorPage() {
       const url = await uploadPdfToStorage(productId, blob)
       setPdfUrl(url)
       setStatus('PDF_GENERATED')
+
+      await updateProduct(productId, {
+        pdf_url: url,
+        status: 'PDF_GENERATED',
+      })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'PDF generation failed'
+      setError(message)
+      console.error('Generate PDF error:', err)
     } finally {
       setGeneratingPdf(false)
     }
@@ -141,6 +160,19 @@ function ProductEditorPage() {
           </Button>
         </div>
       </div>
+
+      {error && (
+        <div className="px-4 py-2 bg-error/10 border-b border-error/20 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-error shrink-0" />
+          <p className="text-sm text-error">{error}</p>
+          <button
+            onClick={() => setError(null)}
+            className="ml-auto text-xs text-error/60 hover:text-error cursor-pointer"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       <div className="flex-1 grid grid-cols-[280px_1fr_280px] overflow-hidden">
         <div className="border-r border-[rgba(255,255,255,0.08)] overflow-y-auto p-4">

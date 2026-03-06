@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Card, StatusBadge, Button } from '@life-axe/ui'
+import { Card, StatusBadge } from '@life-axe/ui'
 import { Plus, FileText, RefreshCw, Download } from 'lucide-react'
 import { getDashboardStats, getProducts, type Product } from '~/lib/products'
 
@@ -26,8 +26,12 @@ function DashboardPage() {
             Overview of your guide library
           </p>
         </div>
-        <Link to="/products/new">
-          <Button icon={<Plus className="w-4 h-4" />}>Create Guide</Button>
+        <Link
+          to="/products/new"
+          className="inline-flex items-center justify-center rounded-lg font-medium transition-colors h-9 px-4 text-sm gap-2 bg-accent text-white hover:bg-accent/90"
+        >
+          <Plus className="w-4 h-4" />
+          Create Guide
         </Link>
       </div>
 

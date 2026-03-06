@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Product {
+  id               String        @id @default(uuid())
+  title            String
+  slug             String        @unique
+  subtitle         String?
+  category         String?
+  audience         String?
+  tone             String?       @default("professional")
+  difficulty       String?       @default("intermediate")
+  shortDescription String?       @map("short_description")
+  longDescription  String?       @map("long_description") @db.Text
+  contentJson      Json?         @map("content_json")
+  pdfUrl           String?       @map("pdf_url")
+  coverImageUrl    String?       @map("cover_image_url")
+  status           ProductStatus @default(DRAFT)
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  @@map("products")
+}
+
+enum ProductStatus {
+  DRAFT
+  CONTENT_GENERATED
+  PDF_GENERATED
+  ARCHIVED
+}

@@ -1,0 +1,24 @@
+{
+  "name": "life-axe",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @life-axe/admin dev",
+    "build": "pnpm --filter @life-axe/admin build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "prisma",
+      "sharp",
+      "workerd"
+    ]
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
